@@ -1,0 +1,50 @@
+From: Brand Official <service@demo-brand.com>
+To: Valued User <user@example.com>
+Subject: New Arrival | Our 2026 Autumn New Products Are Officially Launched
+Date: Mon, 14 Sep 2026 14:30:00 +0800
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary=----ProductNewBoundary67890
+X-Mailer: Brand Email System
+Priority: normal
+
+------ProductNewBoundary67890
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Dear Customer,
+
+We are honored to inform you that our 2026 autumn new series products are officially online!
+
+This new series focuses on comfort, practicality and minimalist design, upgraded in material and detail craftsmanship, suitable for daily life and office scenarios.
+
+New product exclusive benefits:
+1. Pre-order exclusive 15% discount
+2. First 100 orders with exclusive gift pack
+3. 30-day free after-sales warranty
+
+Come to explore our new products and experience the new autumn lifestyle!
+
+Sincerely
+Demo Brand Operation Team
+
+------ProductNewBoundary67890
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<html>
+<body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f9f9f9;">
+<h3 style="color:#333;text-align:center;">2026 Autumn New Series Official Launch</h3>
+<p style="color:#666;font-size:14px;line-height:1.8;">Hi dear customer,</p>
+<p style="color:#666;font-size:14px;line-height:1.8;">After long-term research and polishing, our brand new autumn series is officially released today. We insist on high-quality materials and humanized design to bring you a better using experience.</p>
+<div style="background:#fff;padding:15px;border-radius:6px;margin:20px 0;">
+<p style="margin:5px 0;color:#333;font-size:14px;"><strong>New Product Exclusive Offers:</strong></p>
+<p style="margin:5px 0;color:#666;font-size:14px;">1. Pre-sale limited 15% discount</p>
+<p style="margin:5px 0;color:#666;font-size:14px;">2. Limited exclusive gift for early orders</p>
+<p style="margin:5px 0;color:#666;font-size:14px;">3. Full after-sales protection service</p>
+</div>
+<p style="text-align:center;margin-top:25px;"><a href="#" style="background:#28a745;color:#fff;padding:12px 24px;text-decoration:none;border-radius:5px;display:inline-block;">Check New Products Now</a></p>
+<p style="font-size:12px;color:#999;text-align:center;margin-top:30px;">This is an official brand notification email. You can adjust your subscription preferences on our official platform.</p>
+</body&gt>
+</html>
+
+------ProductNewBoundary67890--
