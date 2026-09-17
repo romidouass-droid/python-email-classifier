@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from tkinter import scrolledtext
 
+from extract_email_text import extract_email_text
+from api_classifier import classify_email
+
 
 class EmailClassifierGUI:
     def __init__(self, root):
@@ -145,11 +148,8 @@ class EmailClassifierGUI:
 
         self.current_file = file_path
 
-        # For now, the GUI reads the file directly.
-        # Later, Task 2's email parser can replace this part.
         try:
-            with open(file_path, "r", encoding="utf-8", errors="ignore") as file:
-                email_content = file.read()
+            email_content = extract_email_text(file_path)
 
             self.current_email = email_content
 
@@ -173,15 +173,9 @@ class EmailClassifierGUI:
             )
 
     # ==========================================================
-    # Temporary classification test
+    # Classification (now connected to the real AI)
     # ==========================================================
     def test_classification(self):
-        """
-        Temporary function for testing the GUI.
-
-        Later this function will call Task 3's AI classifier.
-        """
-
         if not self.current_email:
             messagebox.showwarning(
                 "No Email",
@@ -189,10 +183,16 @@ class EmailClassifierGUI:
             )
             return
 
-        # Temporary result for GUI testing
-        self.current_result = "Important"
+        try:
+            result = classify_email(self.current_email)
+            self.current_result = result
+            self.display_result(result)
 
-        self.display_result(self.current_result)
+        except Exception as error:
+            messagebox.showerror(
+                "Classification Error",
+                f"Could not classify the email.\n\n{error}"
+            )
 
     # ==========================================================
     # Display result
@@ -224,12 +224,8 @@ class EmailClassifierGUI:
     # Save result
     # ==========================================================
     def save_result(self):
-        """
-        Temporary save function.
-
-        Later, Task 5 will connect this button
-        to the JSON saving system.
-        """
+        import json
+        from datetime import datetime
 
         if not self.current_email:
             messagebox.showwarning(
@@ -245,11 +241,26 @@ class EmailClassifierGUI:
             )
             return
 
-        messagebox.showinfo(
-            "Save Result",
-            "Save Result function is ready.\n"
-            "Task 5 will connect the JSON saving system."
-        )
+        record = {
+            "file": self.current_file,
+            "result": self.current_result,
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+
+        try:
+            with open("../saved_results/history.json", "a") as f:
+                f.write(json.dumps(record) + "\n")
+
+            messagebox.showinfo(
+                "Save Result",
+                "Result saved successfully!"
+            )
+
+        except Exception as error:
+            messagebox.showerror(
+                "Save Error",
+                f"Could not save the result.\n\n{error}"
+            )
 
 
 # ==============================================================
