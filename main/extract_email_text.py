@@ -85,7 +85,9 @@ def _html_to_text(html):
     soup = BeautifulSoup(html, "html.parser")
     for tag in soup(["script", "style"]):
         tag.decompose()
-    return soup.get_text(separator="\n")
+    text = soup.get_text(separator="\n")
+    text = re.sub(r"<[^>]+>", "", text)  # remove any leftover HTML tags
+    return text
 
 
 def _clean_text(text):
