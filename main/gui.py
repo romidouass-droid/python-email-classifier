@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from tkinter import scrolledtext
 
+from extract_email_text import extract_email_text
+from api_classifier import classify_email
+
 
 class EmailClassifierGUI:
 
