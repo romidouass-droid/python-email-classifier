@@ -1,6 +1,8 @@
 from api_classifier import classify_email
 
 
+print("TEST 1: Important email")
+
 # Test 1: Important email
 important_email = """
 Subject: Urgent Project Meeting
@@ -15,9 +17,6 @@ Please prepare all the required documents.
 Best regards,
 Project Manager
 """
-
-
-print("TEST 1: Important email")
 
 try:
     result = classify_email(important_email)
@@ -34,6 +33,27 @@ empty_email = ""
 
 try:
     result = classify_email(empty_email)
+    print("Email classification result:", result)
+
+except Exception as error:
+    print("Error:", error)
+
+
+print("\nTEST 3: Normal email")
+
+# Test 3: Normal email
+normal_email = """
+Subject: Lunch tomorrow?
+
+Hey,
+
+Just wanted to check if you're free for lunch tomorrow around 1pm. No pressure, let me know whenever.
+
+Thanks!
+"""
+
+try:
+    result = classify_email(normal_email)
     print("Email classification result:", result)
 
 except Exception as error:

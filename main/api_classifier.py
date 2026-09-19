@@ -4,6 +4,32 @@ import requests
 
 API_URL = "https://router.huggingface.co/hf-inference/models/facebook/bart-large-mnli"
 
+IMPORTANT_KEYWORDS = [
+    "urgent", "deadline", "asap", "immediate", "required",
+    "reminder", "priority", "regression", "failed", "review",
+    "submit", "action required", "important"
+]
+
+NORMAL_KEYWORDS = [
+    "% off", "discount", "sale", "shop now", "offer valid",
+    "new arrival", "exclusive", "pre-order", "promotion"
+]
+
+
+def keyword_check(text):
+    """Check for obvious keywords before calling the AI."""
+    text_lower = text.lower()
+
+    important_matches = sum(1 for word in IMPORTANT_KEYWORDS if word in text_lower)
+    normal_matches = sum(1 for word in NORMAL_KEYWORDS if word in text_lower)
+
+    if important_matches > normal_matches and important_matches > 0:
+        return "Important"
+    elif normal_matches > important_matches and normal_matches > 0:
+        return "Normal"
+
+    return None  # unclear, let the AI decide
+
 
 def classify_email(clean_text):
     """
@@ -19,6 +45,11 @@ def classify_email(clean_text):
     # Check for empty email text
     if not clean_text or not clean_text.strip():
         raise ValueError("Email text cannot be empty.")
+
+    # Try keyword matching first
+    keyword_result = keyword_check(clean_text)
+    if keyword_result:
+        return keyword_result
 
     # Read the Hugging Face token from the environment
     api_token = os.getenv("HF_TOKEN")
