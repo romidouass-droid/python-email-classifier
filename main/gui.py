@@ -1190,37 +1190,88 @@ class EmailClassifierGUI:
             "application"
         ]
 
-        all_text = ""
+        # Classify EACH email separately.
+        # We must not combine all email contents into one text.
+        important_count = 0
+        normal_count = 0
 
         for email in self.emails:
 
-            all_text += (
-                email["content"].lower()
-                + " "
+            email_text = email["content"].lower()
+
+            found = any(
+                word in email_text
+                for word in important_words
             )
 
-        found = any(
-            word in all_text
-            for word in important_words
-        )
+            if found:
+                email["classification"] = "Important"
+                important_count += 1
+            else:
+                email["classification"] = "Normal"
+                normal_count += 1
 
-        if found:
-
+        # Summary for the result card.
+        if important_count == len(self.emails):
             self.current_result = "Important"
-
-        else:
-
+        elif normal_count == len(self.emails):
             self.current_result = "Normal"
+        else:
+            self.current_result = "Mixed"
 
-        for email in self.emails:
+        self.display_result(self.current_result)
 
-            email["classification"] = (
-                self.current_result
+        # Show the individual result beside every email.
+        self.display_email_list()
+
+
+    # ==========================================================
+    # DISPLAY EMAIL LIST WITH INDIVIDUAL RESULTS
+    # ==========================================================
+
+    def display_email_list(self):
+
+        self.email_text.config(state="normal")
+        self.email_text.delete("1.0", tk.END)
+
+        for index, email in enumerate(self.emails, start=1):
+
+            classification = email.get("classification", "")
+
+            if classification == "Important":
+                label = "💗 IMPORTANT"
+            elif classification == "Normal":
+                label = "🌿 NORMAL"
+            else:
+                label = "⏳ NOT CLASSIFIED"
+
+            self.email_text.insert(
+                tk.END,
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             )
 
-        self.display_result(
-            self.current_result
-        )
+            self.email_text.insert(
+                tk.END,
+                f"💌 EMAIL {index}: {email['name']}    {label}\n"
+            )
+
+            self.email_text.insert(
+                tk.END,
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            )
+
+            self.email_text.insert(
+                tk.END,
+                email["content"]
+            )
+
+            self.email_text.insert(
+                tk.END,
+                "\n\n"
+            )
+
+        self.email_text.config(state="disabled")
+
 
     # ==========================================================
     # DISPLAY RESULT
@@ -1239,8 +1290,34 @@ class EmailClassifierGUI:
             )
 
             self.result_description.config(
-                text="These emails may contain\n"
-                     "deadlines or important information.",
+                text="All selected emails are Important.",
+                bg=background
+            )
+
+        elif result.lower() == "mixed":
+
+            background = self.PALE_YELLOW
+
+            important_count = sum(
+                1 for email in self.emails
+                if email.get("classification") == "Important"
+            )
+
+            normal_count = sum(
+                1 for email in self.emails
+                if email.get("classification") == "Normal"
+            )
+
+            self.result_label.config(
+                text="🌸 MIXED RESULTS",
+                bg=background,
+                fg=self.DARK_PURPLE
+            )
+
+            self.result_description.config(
+                text=f"{important_count} Important  •  "
+                     f"{normal_count} Normal\n"
+                     "Each email was classified separately.",
                 bg=background
             )
 
@@ -1255,14 +1332,14 @@ class EmailClassifierGUI:
             )
 
             self.result_description.config(
-                text="Nothing urgent detected.\n"
-                     "You can check these when you have time.",
+                text="All selected emails are Normal.",
                 bg=background
             )
 
         self.result_card.config(
             bg=background
         )
+
 
     # ==========================================================
     # SAVE RESULT
@@ -1288,11 +1365,8 @@ class EmailClassifierGUI:
 
             return
 
-        for email in self.emails:
-
-            email["classification"] = (
-                self.current_result
-            )
+        # Keep each email's individual classification.
+        # Do not replace all results with one global label.
 
         messagebox.showinfo(
             "Saved ♡",
