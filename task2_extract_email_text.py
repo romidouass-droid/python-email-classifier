@@ -125,7 +125,7 @@ _DEADLINE_KEYWORDS = (
     r"no\s+later\s+than|must\s+be\s+(?:completed|submitted)|before"
 )
 
-_KEYWORD_WINDOW = 40  # chars of context to look at before a matched date
+_KEYWORD_WINDOW = 40  # chars of context to look at before a matched date, capped to the same line
 
 
 def extract_deadlines(text):
@@ -135,7 +135,11 @@ def extract_deadlines(text):
     Lightweight: uses only regex, no external date library. Looks for
     common date formats (ISO, slash/dash, and written-out month names)
     and keeps only the ones that have a deadline-style keyword
-    (due, deadline, by, before, expires, etc.) shortly before them.
+    (due, deadline, by, before, expires, etc.) on the SAME LINE, shortly
+    before the date. Matching is scoped per line (not the whole document)
+    so a keyword earlier in an unrelated sentence, or a date repeated in
+    a signature/footer, can't get incorrectly paired with it. Duplicate
+    (date_text, context) pairs are also removed.
 
     Returns a list of dicts:
         {"date_text": "December 31, 2025", "context": "...submit by "}
@@ -144,14 +148,23 @@ def extract_deadlines(text):
         return []
 
     combined_pattern = "|".join(f"(?:{p})" for p in _DATE_PATTERNS)
+    seen = set()
     results = []
 
-    for match in re.finditer(combined_pattern, text, flags=re.IGNORECASE):
-        date_str = match.group(0)
-        window_start = max(0, match.start() - _KEYWORD_WINDOW)
-        context = text[window_start:match.start()]
+    for line in text.splitlines():
+        for match in re.finditer(combined_pattern, line, flags=re.IGNORECASE):
+            date_str = match.group(0)
+            window_start = max(0, match.start() - _KEYWORD_WINDOW)
+            context = line[window_start:match.start()]
 
-        if re.search(_DEADLINE_KEYWORDS, context, flags=re.IGNORECASE):
+            if not re.search(_DEADLINE_KEYWORDS, context, flags=re.IGNORECASE):
+                continue
+
+            key = (date_str.lower(), context.strip().lower())
+            if key in seen:
+                continue  # skip exact duplicate mention
+            seen.add(key)
+
             results.append({
                 "date_text": date_str,
                 "context": context.strip(),
