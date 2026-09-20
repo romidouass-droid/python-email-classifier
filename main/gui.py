@@ -438,6 +438,7 @@ class EmailClassifierGUI:
             expand=True
         )
 
+        # Title
         tk.Label(
             card,
             text="💌  Your Emails",
@@ -447,7 +448,28 @@ class EmailClassifierGUI:
         ).pack(
             anchor="w",
             padx=22,
-            pady=(15, 8)
+            pady=(15, 5)
+        )
+
+        # Main classification button - always visible
+        tk.Button(
+            card,
+            text="✨  CLASSIFY EMAILS",
+            command=self.test_classification,
+            font=("Arial", 11, "bold"),
+            bg=self.BABY_PINK,
+            fg=self.DARK_PURPLE,
+            activebackground=self.LAVENDER,
+            activeforeground=self.DARK_PURPLE,
+            relief="flat",
+            bd=0,
+            padx=30,
+            pady=11,
+            cursor="hand2"
+        ).pack(
+            anchor="w",
+            padx=22,
+            pady=(0, 10)
         )
 
         self.email_text = scrolledtext.ScrolledText(
@@ -466,23 +488,6 @@ class EmailClassifierGUI:
             fill="both",
             expand=True,
             padx=20,
-            pady=(0, 10)
-        )
-
-        tk.Button(
-            card,
-            text="✨  CLASSIFY EMAILS",
-            command=self.test_classification,
-            font=("Arial", 10, "bold"),
-            bg=self.BABY_PINK,
-            fg=self.DARK_PURPLE,
-            activebackground=self.LAVENDER,
-            relief="flat",
-            bd=0,
-            padx=25,
-            pady=10,
-            cursor="hand2"
-        ).pack(
             pady=(0, 10)
         )
 
@@ -1675,21 +1680,84 @@ class EmailClassifierGUI:
             pady=7
         )
 
-        tk.Label(
+        # Email title + small ADD A NOTE button
+        title_row = tk.Frame(
             card,
+            bg=self.LIGHT_ROSE
+        )
+
+        title_row.pack(
+            fill="x",
+            padx=18,
+            pady=(12, 8)
+        )
+
+        tk.Label(
+            title_row,
             text="💌  " + email["name"],
-            font=("Arial", 12, "bold"),
+            font=("Arial", 11, "bold"),
             bg=self.LIGHT_ROSE,
             fg=self.DARK_PURPLE
         ).pack(
+            side="left",
             anchor="w",
-            padx=18,
-            pady=(14, 8)
+            fill="x",
+            expand=True
         )
 
-        # User's note
-        note_box = tk.Text(
+        note_area = tk.Frame(
             card,
+            bg=self.LIGHT_ROSE
+        )
+
+        def show_note_editor():
+
+            if note_area.winfo_ismapped():
+                return
+
+            note_area.pack(
+                fill="x",
+                padx=18,
+                pady=(0, 12)
+            )
+
+            add_button.config(
+                text="✓  NOTE OPEN",
+                state="disabled"
+            )
+
+        add_button = tk.Button(
+            title_row,
+            text="＋ ADD A NOTE",
+            command=show_note_editor,
+            font=("Arial", 8, "bold"),
+            bg=self.WHITE,
+            fg=self.DARK_PURPLE,
+            activebackground=self.BABY_PINK,
+            relief="flat",
+            bd=0,
+            padx=9,
+            pady=5,
+            cursor="hand2"
+        )
+
+        add_button.pack(
+            side="right"
+        )
+
+        tk.Label(
+            note_area,
+            text="📝  " + email["name"],
+            font=("Arial", 9, "bold"),
+            bg=self.LIGHT_ROSE,
+            fg=self.SOFT_PURPLE
+        ).pack(
+            anchor="w",
+            pady=(0, 5)
+        )
+
+        note_box = tk.Text(
+            note_area,
             height=5,
             font=("Arial", 9),
             bg=self.WHITE,
@@ -1701,23 +1769,31 @@ class EmailClassifierGUI:
 
         note_box.pack(
             fill="x",
-            padx=18,
             pady=5
         )
 
         if email.get("note"):
-
             note_box.insert(
                 "1.0",
                 email["note"]
             )
+            show_note_editor()
 
         def save_email_note():
 
-            email["note"] = note_box.get(
+            note = note_box.get(
                 "1.0",
                 tk.END
             ).strip()
+
+            if not note:
+                messagebox.showwarning(
+                    "Empty Note ♡",
+                    "Please write something before saving."
+                )
+                return
+
+            email["note"] = note
 
             messagebox.showinfo(
                 "Note Saved ♡",
@@ -1725,14 +1801,13 @@ class EmailClassifierGUI:
             )
 
         buttons = tk.Frame(
-            card,
+            note_area,
             bg=self.LIGHT_ROSE
         )
 
         buttons.pack(
             fill="x",
-            padx=18,
-            pady=(5, 12)
+            pady=(5, 0)
         )
 
         tk.Button(
@@ -1742,6 +1817,7 @@ class EmailClassifierGUI:
             font=("Arial", 8, "bold"),
             bg=self.WHITE,
             fg=self.DARK_PURPLE,
+            activebackground=self.BABY_PINK,
             relief="flat",
             bd=0,
             cursor="hand2"
