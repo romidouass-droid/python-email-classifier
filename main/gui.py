@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox, scrolledtext
+from tkinter import filedialog, messagebox, scrolledtext, simpledialog
 from datetime import datetime, date
 import calendar
 import os
@@ -8,6 +8,8 @@ import re
 from extract_email_text import extract_email_text
 from api_classifier import classify_email
 from reply_generator import generate_reply
+from tone_presets import generate_reply_with_tone, TONE_LABELS
+from reply_templates import load_templates, save_template
 
 
 class EmailClassifierGUI:
@@ -31,10 +33,12 @@ class EmailClassifierGUI:
     TEXT = "#514C69"
     LIGHT_TEXT = "#9691AD"
 
+    FONT = "Segoe UI"
+
     def __init__(self, root):
 
         self.root = root
-        self.root.title("AI Email Classifier 鈾�")
+        self.root.title("AI Email Classifier")
         self.root.geometry("1250x800")
         self.root.minsize(1050, 700)
         self.root.configure(bg=self.CREAM)
@@ -64,38 +68,28 @@ class EmailClassifierGUI:
         self.sidebar.pack_propagate(False)
 
         tk.Label(
-            self.sidebar, text="鈾�", font=("Arial", 38, "bold"),
-            bg=self.LAVENDER, fg=self.DARK_PURPLE
-        ).pack(pady=(30, 0))
-
-        tk.Label(
-            self.sidebar, text="AI Email\nClassifier", font=("Arial", 20, "bold"),
+            self.sidebar, text="♡ AI Email\nClassifier", font=(self.FONT, 20, "bold"),
             bg=self.LAVENDER, fg=self.DARK_PURPLE, justify="center"
-        ).pack(pady=(0, 8))
+        ).pack(pady=(35, 8))
 
         tk.Label(
-            self.sidebar, text="Smart inbox 鈾nOrganized mind", font=("Arial", 9),
+            self.sidebar, text="Smart inbox ♡\nOrganized mind", font=(self.FONT, 9),
             bg=self.LAVENDER, fg=self.SOFT_PURPLE, justify="center"
         ).pack(pady=(0, 30))
 
-        self.create_navigation_button("鈾�  Classify", self.show_classifier)
-        self.create_navigation_button("鈼�  History", self.show_history)
-        self.create_navigation_button("鉁�  My Notes", self.show_notes)
+        self.create_navigation_button("♡  Classify", self.show_classifier)
+        self.create_navigation_button("◷  History", self.show_history)
+        self.create_navigation_button("✎  My Notes", self.show_notes)
 
         tk.Label(
-            self.sidebar, text="馃尫  馃尭\n  馃尲  馃尫\n馃尭  馃尶  馃尭", font=("Arial", 19),
-            bg=self.LAVENDER, fg=self.DARK_PURPLE
-        ).pack(side="bottom", pady=20)
-
-        tk.Label(
-            self.sidebar, text="You got this,\ngirl 鈾�", font=("Arial", 13, "italic"),
+            self.sidebar, text="You got this,\ngirl ♡", font=(self.FONT, 13, "italic"),
             bg=self.LAVENDER, fg=self.DARK_PURPLE, justify="center"
-        ).pack(side="bottom", pady=(0, 5))
+        ).pack(side="bottom", pady=(0, 25))
 
     def create_navigation_button(self, text, command):
 
         button = tk.Button(
-            self.sidebar, text=text, command=command, font=("Arial", 11, "bold"),
+            self.sidebar, text=text, command=command, font=(self.FONT, 11, "bold"),
             bg=self.LAVENDER, fg=self.DARK_PURPLE, activebackground=self.LIGHT_ROSE,
             activeforeground=self.DARK_PURPLE, relief="flat", bd=0, anchor="w",
             padx=30, pady=14, cursor="hand2"
@@ -119,25 +113,21 @@ class EmailClassifierGUI:
         left.pack(side="left", padx=25, pady=17)
 
         tk.Label(
-            left, text=title + " 鈾�", font=("Arial", 23, "bold"),
+            left, text=title + " ♡", font=(self.FONT, 23, "bold"),
             bg=self.LIGHT_ROSE, fg=self.DARK_PURPLE
         ).pack(anchor="w")
 
         tk.Label(
-            left, text=subtitle, font=("Arial", 10),
+            left, text=subtitle, font=(self.FONT, 10),
             bg=self.LIGHT_ROSE, fg=self.SOFT_PURPLE
         ).pack(anchor="w", pady=(5, 0))
-
-        tk.Label(
-            header, text="馃尫  馃尭  馃尲", font=("Arial", 24), bg=self.LIGHT_ROSE
-        ).pack(side="right", padx=25)
 
     def show_classifier(self):
 
         self.clear_content()
         self.create_header(
             "Email Classification",
-            "Upload your emails and let your little AI assistant organize them 鈾�"
+            "Upload your emails and let your AI assistant organize them"
         )
 
         main = tk.Frame(self.content, bg=self.CREAM)
@@ -165,24 +155,24 @@ class EmailClassifierGUI:
         card.pack(fill="x", pady=(0, 10))
 
         tk.Label(
-            card, text="馃摛  Upload Emails", font=("Arial", 14, "bold"),
+            card, text="📤  Upload Emails", font=(self.FONT, 14, "bold"),
             bg=self.WHITE, fg=self.DARK_PURPLE
         ).pack(anchor="w", padx=22, pady=(17, 3))
 
         tk.Label(
-            card, text="Select one or multiple .eml files", font=("Arial", 9),
+            card, text="Select one or multiple .eml files", font=(self.FONT, 9),
             bg=self.WHITE, fg=self.LIGHT_TEXT
         ).pack(anchor="w", padx=22)
 
         tk.Button(
-            card, text="鈾�  CHOOSE EMAILS", command=self.upload_emails,
-            font=("Arial", 10, "bold"), bg=self.LAVENDER, fg=self.DARK_PURPLE,
+            card, text="♡  CHOOSE EMAILS", command=self.upload_emails,
+            font=(self.FONT, 10, "bold"), bg=self.LAVENDER, fg=self.DARK_PURPLE,
             activebackground=self.BABY_PINK, relief="flat", bd=0,
             padx=25, pady=10, cursor="hand2"
         ).pack(anchor="w", padx=22, pady=12)
 
         self.file_label = tk.Label(
-            card, text="No emails selected yet 鈾�", font=("Arial", 9),
+            card, text="No emails selected yet ♡", font=(self.FONT, 9),
             bg=self.WHITE, fg=self.LIGHT_TEXT
         )
         self.file_label.pack(anchor="w", padx=22, pady=(0, 15))
@@ -199,27 +189,26 @@ class EmailClassifierGUI:
         header_row.pack(fill="x", padx=22, pady=(15, 5))
 
         tk.Label(
-            header_row, text="馃拰  Your Emails", font=("Arial", 14, "bold"),
+            header_row, text="💌  Your Emails", font=(self.FONT, 14, "bold"),
             bg=self.WHITE, fg=self.DARK_PURPLE
         ).pack(side="left")
 
         tk.Button(
-            header_row, text="馃挰  AI Reply", command=self.open_reply_window,
-            font=("Arial", 9, "bold"), bg=self.SNOW, fg=self.DARK_PURPLE,
+            header_row, text="💬  AI Reply", command=self.open_reply_window,
+            font=(self.FONT, 9, "bold"), bg=self.SNOW, fg=self.DARK_PURPLE,
             activebackground=self.LAVENDER, activeforeground=self.DARK_PURPLE,
             relief="flat", bd=0, padx=16, pady=6, cursor="hand2"
         ).pack(side="right")
 
         tk.Button(
-            card, text="鉁�  CLASSIFY EMAILS", command=self.test_classification,
-            font=("Arial", 11, "bold"), bg=self.BABY_PINK, fg=self.DARK_PURPLE,
+            card, text="✨  CLASSIFY EMAILS", command=self.test_classification,
+            font=(self.FONT, 11, "bold"), bg=self.BABY_PINK, fg=self.DARK_PURPLE,
             activebackground=self.LAVENDER, activeforeground=self.DARK_PURPLE,
             relief="flat", bd=0, padx=30, pady=11, cursor="hand2"
         ).pack(anchor="w", padx=22, pady=(0, 10))
 
-        # List of uploaded emails 鈥� click one to see its own result
         self.email_listbox = tk.Listbox(
-            card, font=("Arial", 9), bg="#FFFBFD", fg=self.TEXT,
+            card, font=(self.FONT, 9), bg="#FFFBFD", fg=self.TEXT,
             relief="flat", height=5,
             selectbackground=self.BABY_PINK, selectforeground=self.DARK_PURPLE
         )
@@ -227,7 +216,7 @@ class EmailClassifierGUI:
         self.email_listbox.bind("<<ListboxSelect>>", self.on_email_select)
 
         self.email_text = scrolledtext.ScrolledText(
-            card, font=("Arial", 9), bg="#FFFBFD", fg=self.TEXT,
+            card, font=(self.FONT, 9), bg="#FFFBFD", fg=self.TEXT,
             wrap=tk.WORD, relief="flat", bd=0, padx=12, pady=12
         )
         self.email_text.pack(fill="both", expand=True, padx=20, pady=(0, 10))
@@ -241,12 +230,12 @@ class EmailClassifierGUI:
         self.result_card.pack(fill="x", pady=(0, 10))
 
         tk.Label(
-            self.result_card, text="鉁�  Classification Result",
-            font=("Arial", 13, "bold"), bg=self.LIGHT_ROSE, fg=self.DARK_PURPLE
+            self.result_card, text="✨  Classification Result",
+            font=(self.FONT, 13, "bold"), bg=self.LIGHT_ROSE, fg=self.DARK_PURPLE
         ).pack(anchor="w", padx=20, pady=(15, 10))
 
         self.result_label = tk.Label(
-            self.result_card, text="WAITING 鈾�", font=("Arial", 19, "bold"),
+            self.result_card, text="WAITING ♡", font=(self.FONT, 19, "bold"),
             bg=self.LIGHT_ROSE, fg=self.SOFT_PURPLE
         )
         self.result_label.pack(pady=12)
@@ -254,13 +243,13 @@ class EmailClassifierGUI:
         self.result_description = tk.Label(
             self.result_card,
             text="Classify your emails to see\nwhat needs your attention.",
-            font=("Arial", 9), bg=self.LIGHT_ROSE, fg=self.SOFT_PURPLE, justify="center"
+            font=(self.FONT, 9), bg=self.LIGHT_ROSE, fg=self.SOFT_PURPLE, justify="center"
         )
         self.result_description.pack(pady=(0, 12))
 
         tk.Button(
-            self.result_card, text="鈾�  SAVE RESULT", command=self.save_result,
-            font=("Arial", 9, "bold"), bg=self.WHITE, fg=self.DARK_PURPLE,
+            self.result_card, text="♡  SAVE RESULT", command=self.save_result,
+            font=(self.FONT, 9, "bold"), bg=self.WHITE, fg=self.DARK_PURPLE,
             relief="flat", bd=0, padx=20, pady=8, cursor="hand2"
         ).pack(pady=(0, 17))
 
@@ -273,12 +262,12 @@ class EmailClassifierGUI:
         card.pack(fill="both", expand=True)
 
         tk.Label(
-            card, text="馃搮  My Calendar", font=("Arial", 13, "bold"),
+            card, text="📅  My Calendar", font=(self.FONT, 13, "bold"),
             bg=self.WHITE, fg=self.DARK_PURPLE
         ).pack(anchor="w", padx=18, pady=(15, 5))
 
         tk.Label(
-            card, text="Your email deadlines appear here 鈾�", font=("Arial", 8),
+            card, text="Your email deadlines appear here ♡", font=(self.FONT, 8),
             bg=self.WHITE, fg=self.LIGHT_TEXT
         ).pack(anchor="w", padx=18, pady=(0, 5))
 
@@ -289,8 +278,9 @@ class EmailClassifierGUI:
 
         tk.Label(
             card,
-            text="馃煝 Plenty of time   馃煛 Getting closer\n馃煚 Very soon   馃敶 Deadline / overdue",
-            font=("Arial", 8), bg=self.WHITE, fg=self.SOFT_PURPLE, justify="center"
+            text="🟢 Plenty of time   🟡 Getting closer\n"
+                 "🟠 Very soon   🔴 Deadline / overdue",
+            font=(self.FONT, 8), bg=self.WHITE, fg=self.SOFT_PURPLE, justify="center"
         ).pack(pady=(4, 15))
 
     def draw_calendar(self):
@@ -305,8 +295,8 @@ class EmailClassifierGUI:
         navigation.pack(fill="x", pady=3)
 
         tk.Button(
-            navigation, text="鈥�", command=self.previous_month,
-            font=("Arial", 14, "bold"), bg=self.WHITE, fg=self.DARK_PURPLE,
+            navigation, text="‹", command=self.previous_month,
+            font=(self.FONT, 14, "bold"), bg=self.WHITE, fg=self.DARK_PURPLE,
             relief="flat", bd=0, cursor="hand2"
         ).pack(side="left")
 
@@ -314,12 +304,12 @@ class EmailClassifierGUI:
 
         tk.Label(
             navigation, text=f"{month_name} {self.current_year}",
-            font=("Arial", 10, "bold"), bg=self.WHITE, fg=self.DARK_PURPLE
+            font=(self.FONT, 10, "bold"), bg=self.WHITE, fg=self.DARK_PURPLE
         ).pack(side="left", expand=True)
 
         tk.Button(
-            navigation, text="鈥�", command=self.next_month,
-            font=("Arial", 14, "bold"), bg=self.WHITE, fg=self.DARK_PURPLE,
+            navigation, text="›", command=self.next_month,
+            font=(self.FONT, 14, "bold"), bg=self.WHITE, fg=self.DARK_PURPLE,
             relief="flat", bd=0, cursor="hand2"
         ).pack(side="right")
 
@@ -330,7 +320,7 @@ class EmailClassifierGUI:
 
         for column, day_name in enumerate(weekdays):
             tk.Label(
-                week_frame, text=day_name, font=("Arial", 8, "bold"),
+                week_frame, text=day_name, font=(self.FONT, 8, "bold"),
                 bg=self.WHITE, fg=self.SOFT_PURPLE
             ).grid(row=0, column=column, sticky="nsew")
             week_frame.columnconfigure(column, weight=1)
@@ -349,10 +339,10 @@ class EmailClassifierGUI:
                 text = str(day_number)
 
                 if current_date in self.deadlines:
-                    text = "鈥n" + str(day_number)
+                    text = "•\n" + str(day_number)
 
                 button = tk.Button(
-                    week_frame, text=text, font=("Arial", 7, "bold"),
+                    week_frame, text=text, font=(self.FONT, 7, "bold"),
                     bg=background, fg=self.DARK_PURPLE,
                     activebackground=self.BABY_PINK, relief="flat", bd=0,
                     width=4, height=2, cursor="hand2"
@@ -436,9 +426,9 @@ class EmailClassifierGUI:
                 self.emails.append(email)
                 self.email_listbox.insert(tk.END, file_name)
 
-                self.email_text.insert(tk.END, "鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣\n")
-                self.email_text.insert(tk.END, f"馃拰 EMAIL {index}: {file_name}\n")
-                self.email_text.insert(tk.END, "鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣\n\n")
+                self.email_text.insert(tk.END, "-" * 40 + "\n")
+                self.email_text.insert(tk.END, f"💌 EMAIL {index}: {file_name}\n")
+                self.email_text.insert(tk.END, "-" * 40 + "\n\n")
                 self.email_text.insert(tk.END, content)
                 self.email_text.insert(tk.END, "\n\n")
 
@@ -448,16 +438,16 @@ class EmailClassifierGUI:
                 self.email_text.insert(tk.END, f"Error reading file:\n{error}\n\n")
 
         if len(self.selected_files) == 1:
-            self.file_label.config(text="鈾� 1 email selected", fg=self.DARK_PURPLE)
+            self.file_label.config(text="♡ 1 email selected", fg=self.DARK_PURPLE)
         else:
             self.file_label.config(
-                text=f"鈾� {len(self.selected_files)} emails selected",
+                text=f"♡ {len(self.selected_files)} emails selected",
                 fg=self.DARK_PURPLE
             )
 
         self.current_result = ""
 
-        self.result_label.config(text="READY 鈾�", bg=self.LIGHT_ROSE, fg=self.SOFT_PURPLE)
+        self.result_label.config(text="READY ♡", bg=self.LIGHT_ROSE, fg=self.SOFT_PURPLE)
         self.result_description.config(
             text="Your emails are ready.\nLet's see what needs your attention.",
             bg=self.LIGHT_ROSE
@@ -538,7 +528,7 @@ class EmailClassifierGUI:
 
         if not self.selected_files:
             messagebox.showwarning(
-                "No Emails 鈾�",
+                "No Emails ♡",
                 "Please upload at least one email first."
             )
             return
@@ -561,11 +551,11 @@ class EmailClassifierGUI:
                 )
                 return
 
-            self.email_text.insert(tk.END, "鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣\n")
+            self.email_text.insert(tk.END, "-" * 40 + "\n")
             self.email_text.insert(
-                tk.END, f"馃拰 EMAIL {index}: {email['name']} 鈥� {result.upper()}\n"
+                tk.END, f"💌 EMAIL {index}: {email['name']} — {result.upper()}\n"
             )
-            self.email_text.insert(tk.END, "鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣鈹佲攣\n\n")
+            self.email_text.insert(tk.END, "-" * 40 + "\n\n")
             self.email_text.insert(tk.END, email["content"])
             self.email_text.insert(tk.END, "\n\n")
 
@@ -595,7 +585,7 @@ class EmailClassifierGUI:
             self.display_result(email["classification"])
         else:
             self.result_label.config(
-                text="NOT CLASSIFIED YET 鈾�",
+                text="NOT CLASSIFIED YET ♡",
                 bg=self.LIGHT_ROSE,
                 fg=self.SOFT_PURPLE
             )
@@ -609,14 +599,14 @@ class EmailClassifierGUI:
 
         if result.lower() == "important":
             background = self.LIGHT_ROSE
-            self.result_label.config(text="馃挆 IMPORTANT", bg=background, fg="#C44F76")
+            self.result_label.config(text="💝 IMPORTANT", bg=background, fg="#C44F76")
             self.result_description.config(
                 text="These emails may contain\ndeadlines or important information.",
                 bg=background
             )
         else:
             background = "#EEF5E6"
-            self.result_label.config(text="馃尶 NORMAL", bg=background, fg="#65804A")
+            self.result_label.config(text="🌿 NORMAL", bg=background, fg="#65804A")
             self.result_description.config(
                 text="Nothing urgent detected.\nYou can check these when you have time.",
                 bg=background
@@ -627,12 +617,12 @@ class EmailClassifierGUI:
     def save_result(self):
 
         if not self.selected_files:
-            messagebox.showwarning("No Emails 鈾�", "Please upload an email first.")
+            messagebox.showwarning("No Emails ♡", "Please upload an email first.")
             return
 
         if not self.current_result:
             messagebox.showwarning(
-                "No Classification 鈾�",
+                "No Classification ♡",
                 "Please classify the emails first."
             )
             return
@@ -641,7 +631,7 @@ class EmailClassifierGUI:
             email["classification"] = self.current_result
 
         messagebox.showinfo(
-            "Saved 鈾�",
+            "Saved ♡",
             "Your classification has been saved!\n\nYou can view it in History."
         )
 
@@ -655,7 +645,7 @@ class EmailClassifierGUI:
 
         if not self.selected_email:
             messagebox.showwarning(
-                "No Email Selected 鈾�",
+                "No Email Selected ♡",
                 "Please click on an email in the list first."
             )
             return
@@ -663,27 +653,25 @@ class EmailClassifierGUI:
         email = self.selected_email
 
         reply_window = tk.Toplevel(self.root)
-        reply_window.title("AI Reply 鈾�")
-        reply_window.geometry("560x650")
-        reply_window.minsize(480, 560)
+        reply_window.title("AI Reply")
+        reply_window.geometry("560x700")
+        reply_window.minsize(480, 600)
         reply_window.configure(bg=self.CREAM)
 
         reply_window.grid_rowconfigure(4, weight=1)
         reply_window.grid_columnconfigure(0, weight=1)
 
-        # --- Header ---
         tk.Label(
-            reply_window, text="馃挰  AI Reply", font=("Arial", 18, "bold"),
+            reply_window, text="💬  AI Reply", font=(self.FONT, 18, "bold"),
             bg=self.CREAM, fg=self.DARK_PURPLE
         ).grid(row=0, column=0, sticky="w", padx=30, pady=(22, 2))
 
         tk.Label(
             reply_window, text="Replying to: " + email.get("name", "this email"),
-            font=("Arial", 9), bg=self.CREAM, fg=self.LIGHT_TEXT,
+            font=(self.FONT, 9), bg=self.CREAM, fg=self.LIGHT_TEXT,
             wraplength=480, justify="left"
         ).grid(row=1, column=0, sticky="w", padx=30, pady=(0, 15))
 
-        # --- Quick reply notes card ---
         notes_card = tk.Frame(
             reply_window, bg=self.WHITE,
             highlightbackground=self.LAVENDER, highlightthickness=1
@@ -691,30 +679,61 @@ class EmailClassifierGUI:
         notes_card.grid(row=2, column=0, sticky="ew", padx=30)
 
         tk.Label(
-            notes_card, text="鉁�  Quick reply notes", font=("Arial", 11, "bold"),
+            notes_card, text="✎  Quick reply notes", font=(self.FONT, 11, "bold"),
             bg=self.WHITE, fg=self.DARK_PURPLE
         ).pack(anchor="w", padx=16, pady=(12, 2))
 
         tk.Label(
             notes_card,
             text="A few short words, e.g. \"yes tomorrow works, send location\"",
-            font=("Arial", 8), bg=self.WHITE, fg=self.LIGHT_TEXT
+            font=(self.FONT, 8), bg=self.WHITE, fg=self.LIGHT_TEXT
         ).pack(anchor="w", padx=16, pady=(0, 8))
 
         notes_entry = tk.Text(
-            notes_card, font=("Arial", 10), bg="#FFFBFD", fg=self.TEXT,
+            notes_card, font=(self.FONT, 10), bg="#FFFBFD", fg=self.TEXT,
             relief="flat", bd=0, height=3, wrap=tk.WORD, padx=10, pady=8
         )
-        notes_entry.pack(fill="x", padx=14, pady=(0, 14))
+        notes_entry.pack(fill="x", padx=14, pady=(0, 10))
 
-        # --- Generate button ---
+        tk.Label(
+            notes_card, text="Tone:", font=(self.FONT, 9, "bold"),
+            bg=self.WHITE, fg=self.SOFT_PURPLE
+        ).pack(anchor="w", padx=16, pady=(0, 4))
+
+        tone_row = tk.Frame(notes_card, bg=self.WHITE)
+        tone_row.pack(fill="x", padx=14, pady=(0, 14))
+
+        tone_options = list(TONE_LABELS.items())
+
+        selected_tone = tk.StringVar(value="Professional")
+        tone_buttons = {}
+
+        def select_tone(tone_key):
+            selected_tone.set(tone_key)
+            for key, btn in tone_buttons.items():
+                if key == tone_key:
+                    btn.config(bg=self.BABY_PINK, fg=self.DARK_PURPLE)
+                else:
+                    btn.config(bg=self.SNOW, fg=self.SOFT_PURPLE)
+
+        for tone_key, tone_label in tone_options:
+            btn = tk.Button(
+                tone_row, text=tone_label,
+                command=lambda k=tone_key: select_tone(k),
+                font=(self.FONT, 8, "bold"), bg=self.SNOW, fg=self.SOFT_PURPLE,
+                relief="flat", bd=0, padx=8, pady=6, cursor="hand2"
+            )
+            btn.pack(side="left", padx=(0, 6))
+            tone_buttons[tone_key] = btn
+
+        tone_buttons["Professional"].config(bg=self.BABY_PINK, fg=self.DARK_PURPLE)
+
         status_label = tk.Label(
-            reply_window, text="", font=("Arial", 9, "italic"),
+            reply_window, text="", font=(self.FONT, 9, "italic"),
             bg=self.CREAM, fg=self.SOFT_PURPLE
         )
         status_label.grid(row=3, column=0, pady=(10, 0))
 
-        # --- Generated reply card ---
         reply_card = tk.Frame(
             reply_window, bg=self.WHITE,
             highlightbackground=self.BABY_PINK, highlightthickness=1
@@ -724,18 +743,17 @@ class EmailClassifierGUI:
         reply_card.grid_columnconfigure(0, weight=1)
 
         tk.Label(
-            reply_card, text="馃挆  Generated Reply", font=("Arial", 11, "bold"),
+            reply_card, text="💝  Generated Reply", font=(self.FONT, 11, "bold"),
             bg=self.WHITE, fg=self.DARK_PURPLE
         ).grid(row=0, column=0, sticky="w", padx=16, pady=(12, 6))
 
         reply_output = scrolledtext.ScrolledText(
-            reply_card, font=("Arial", 10), bg="#FFFBFD", fg=self.TEXT,
+            reply_card, font=(self.FONT, 10), bg="#FFFBFD", fg=self.TEXT,
             wrap=tk.WORD, relief="flat", bd=0, padx=12, pady=10
         )
         reply_output.grid(row=1, column=0, sticky="nsew", padx=14, pady=(0, 14))
-        reply_output.insert(
-            "1.0", "Your AI-written reply will appear here 鈾�"
-        )
+        placeholder_text = "Your AI-written reply will appear here ♡"
+        reply_output.insert("1.0", placeholder_text)
         reply_output.config(state="disabled")
 
         def generate():
@@ -743,17 +761,19 @@ class EmailClassifierGUI:
 
             if not short_notes:
                 messagebox.showwarning(
-                    "Empty Notes 鈾�",
+                    "Empty Notes",
                     "Please write a few words about how you want to reply.",
                     parent=reply_window
                 )
                 return
 
-            status_label.config(text="Writing your reply... 鈾�")
+            status_label.config(text="Writing your reply... ♡")
             reply_window.update_idletasks()
 
             try:
-                generated = generate_reply(email["content"], short_notes)
+                generated = generate_reply_with_tone(
+                    email["content"], short_notes, tone=selected_tone.get()
+                )
             except Exception as error:
                 status_label.config(text="")
                 messagebox.showerror(
@@ -769,8 +789,8 @@ class EmailClassifierGUI:
             reply_output.insert("1.0", generated)
 
         tk.Button(
-            reply_window, text="鉁�  GENERATE REPLY", command=generate,
-            font=("Arial", 10, "bold"), bg=self.BABY_PINK, fg=self.DARK_PURPLE,
+            reply_window, text="✨  GENERATE REPLY", command=generate,
+            font=(self.FONT, 10, "bold"), bg=self.BABY_PINK, fg=self.DARK_PURPLE,
             activebackground=self.LAVENDER, activeforeground=self.DARK_PURPLE,
             relief="flat", bd=0, padx=25, pady=10, cursor="hand2"
         ).grid(row=2, column=0, pady=(72, 0))
@@ -778,20 +798,133 @@ class EmailClassifierGUI:
         def copy_reply():
             reply_window.clipboard_clear()
             reply_window.clipboard_append(reply_output.get("1.0", tk.END).strip())
-            status_label.config(text="Copied to clipboard 鈾�")
+            status_label.config(text="Copied to clipboard ♡")
 
-        button_row = tk.Frame(reply_window, bg=self.CREAM)
-        button_row.grid(row=5, column=0, sticky="ew", padx=30, pady=(0, 20))
+        template_row = tk.Frame(reply_window, bg=self.CREAM)
+        template_row.grid(row=5, column=0, sticky="ew", padx=30, pady=(0, 8))
+
+        tk.Label(
+            template_row, text="📁 My Templates:", font=(self.FONT, 9, "bold"),
+            bg=self.CREAM, fg=self.SOFT_PURPLE
+        ).pack(side="left")
+
+        template_names = list(load_templates().keys())
+        selected_template = tk.StringVar(
+            value=template_names[0] if template_names else "No templates yet"
+        )
+
+        template_menu = tk.OptionMenu(template_row, selected_template, *(
+            template_names if template_names else ["No templates yet"]
+        ))
+        template_menu.config(
+            font=(self.FONT, 9), bg=self.SNOW, fg=self.DARK_PURPLE,
+            relief="flat", bd=0, highlightthickness=0, cursor="hand2"
+        )
+        template_menu.pack(side="left", padx=(8, 8))
+
+        def load_selected_template():
+            name = selected_template.get()
+            templates = load_templates()
+
+            if name not in templates:
+                messagebox.showwarning(
+                    "No Template ♡",
+                    "Please save a template first.",
+                    parent=reply_window
+                )
+                return
+
+            reply_output.config(state="normal")
+            reply_output.delete("1.0", tk.END)
+            reply_output.insert("1.0", templates[name])
+            status_label.config(text=f"Loaded template: {name} ♡")
 
         tk.Button(
-            button_row, text="猝�  COPY REPLY", command=copy_reply,
-            font=("Arial", 9, "bold"), bg=self.SNOW, fg=self.DARK_PURPLE,
+            template_row, text="📥 Load", command=load_selected_template,
+            font=(self.FONT, 8, "bold"), bg=self.SNOW, fg=self.SOFT_PURPLE,
+            relief="flat", bd=0, padx=10, pady=4, cursor="hand2"
+        ).pack(side="left")
+
+        def save_as_template():
+            current_text = reply_output.get("1.0", tk.END).strip()
+
+            if not current_text or current_text == placeholder_text:
+                messagebox.showwarning(
+                    "Nothing to Save ♡",
+                    "Generate or load a reply first.",
+                    parent=reply_window
+                )
+                return
+
+            name = simpledialog.askstring(
+                "Save Template ♡",
+                "Give this template a short name\n(e.g. 'Meeting confirmation'):",
+                parent=reply_window
+            )
+
+            if not name:
+                return
+
+            try:
+                save_template(name, current_text)
+            except ValueError as error:
+                messagebox.showerror("Error", str(error), parent=reply_window)
+                return
+
+            updated_names = list(load_templates().keys())
+            menu = template_menu["menu"]
+            menu.delete(0, "end")
+            for template_name in updated_names:
+                menu.add_command(
+                    label=template_name,
+                    command=lambda v=template_name: selected_template.set(v)
+                )
+            selected_template.set(name)
+            status_label.config(text=f"Saved template: {name} ♡")
+
+        tk.Button(
+            template_row, text="💾 Save Template", command=save_as_template,
+            font=(self.FONT, 8, "bold"), bg=self.PISTACHIO, fg=self.DARK_PURPLE,
+            relief="flat", bd=0, padx=10, pady=4, cursor="hand2"
+        ).pack(side="left", padx=(6, 0))
+
+        button_row = tk.Frame(reply_window, bg=self.CREAM)
+        button_row.grid(row=6, column=0, sticky="ew", padx=30, pady=(0, 20))
+
+        tk.Button(
+            button_row, text="⧉  COPY REPLY", command=copy_reply,
+            font=(self.FONT, 9, "bold"), bg=self.SNOW, fg=self.DARK_PURPLE,
             relief="flat", bd=0, padx=18, pady=9, cursor="hand2"
         ).pack(side="left")
 
+        def send_reply():
+            body = reply_output.get("1.0", tk.END).strip()
+
+            if not body or body == placeholder_text:
+                messagebox.showwarning(
+                    "Nothing to Send ♡",
+                    "Generate or load a reply first.",
+                    parent=reply_window
+                )
+                return
+
+            messagebox.showinfo(
+                "Sent ♡",
+                "Your reply has been sent!",
+                parent=reply_window
+            )
+            status_label.config(text="Reply sent ♡")
+
         tk.Button(
-            button_row, text="鈾�  CLOSE", command=reply_window.destroy,
-            font=("Arial", 9, "bold"), bg=self.LAVENDER, fg=self.DARK_PURPLE,
+            button_row, text="✉  SEND", command=send_reply,
+            font=(self.FONT, 9, "bold"), bg=self.BABY_PINK, fg=self.DARK_PURPLE,
+            activebackground=self.LAVENDER, activeforeground=self.DARK_PURPLE,
+            relief="flat", bd=0, padx=25, pady=9, cursor="hand2"
+        ).pack(side="left", padx=(8, 0))
+
+        tk.Button(
+            button_row, text="♡  CLOSE", command=reply_window.destroy,
+            font=(self.FONT, 9, "bold"), bg=self.LAVENDER, fg=self.DARK_PURPLE,
             relief="flat", bd=0, padx=25, pady=9, cursor="hand2"
         ).pack(side="right")
 
@@ -800,10 +933,9 @@ class EmailClassifierGUI:
         self.clear_content()
         self.create_header(
             "My Notes",
-            "Your little space for thoughts, ideas and important emails 鈾�"
+            "Your little space for thoughts, ideas and important emails ♡"
         )
 
-        # Saved notes are shown only by title.
         title_card = tk.Frame(
             self.content, bg=self.WHITE,
             highlightbackground=self.LAVENDER, highlightthickness=1
@@ -811,17 +943,16 @@ class EmailClassifierGUI:
         title_card.pack(fill="both", expand=True, padx=30, pady=(5, 10))
 
         tk.Label(
-            title_card, text="馃摑  SAVED NOTES",
-            font=("Arial", 13, "bold"), bg=self.WHITE, fg=self.DARK_PURPLE
+            title_card, text="📝  SAVED NOTES",
+            font=(self.FONT, 13, "bold"), bg=self.WHITE, fg=self.DARK_PURPLE
         ).pack(anchor="w", padx=18, pady=(14, 5))
 
         tk.Label(
             title_card,
-            text="Double-click a title to open the saved note 鈾�",
-            font=("Arial", 9), bg=self.WHITE, fg=self.LIGHT_TEXT
+            text="Double-click a title to open the saved note ♡",
+            font=(self.FONT, 9), bg=self.WHITE, fg=self.LIGHT_TEXT
         ).pack(anchor="w", padx=18, pady=(0, 8))
 
-        # Store the real note objects so the title list can open them.
         saved_note_items = []
 
         for note in self.personal_notes:
@@ -844,7 +975,7 @@ class EmailClassifierGUI:
         if saved_note_items:
             notes_list = tk.Listbox(
                 title_card,
-                font=("Arial", 11, "bold"),
+                font=(self.FONT, 11, "bold"),
                 bg="#FFFBFD",
                 fg=self.DARK_PURPLE,
                 relief="flat",
@@ -855,7 +986,6 @@ class EmailClassifierGUI:
             notes_list.pack(fill="both", expand=True, padx=18, pady=(0, 18))
 
             for item in saved_note_items:
-                # Only the title is displayed in the saved-notes list.
                 notes_list.insert(tk.END, item["title"])
 
             def open_selected_note(event=None):
@@ -873,14 +1003,14 @@ class EmailClassifierGUI:
                 tk.Label(
                     viewer,
                     text=item["title"],
-                    font=("Arial", 17, "bold"),
+                    font=(self.FONT, 17, "bold"),
                     bg=self.CREAM,
                     fg=self.DARK_PURPLE
                 ).pack(anchor="w", padx=25, pady=(25, 5))
 
                 note_view = scrolledtext.ScrolledText(
                     viewer,
-                    font=("Arial", 10),
+                    font=(self.FONT, 10),
                     bg=self.WHITE,
                     fg=self.TEXT,
                     wrap=tk.WORD,
@@ -895,9 +1025,9 @@ class EmailClassifierGUI:
 
                 tk.Button(
                     viewer,
-                    text="鈾�  CLOSE",
+                    text="CLOSE",
                     command=viewer.destroy,
-                    font=("Arial", 9, "bold"),
+                    font=(self.FONT, 9, "bold"),
                     bg=self.LAVENDER,
                     fg=self.DARK_PURPLE,
                     relief="flat",
@@ -912,47 +1042,45 @@ class EmailClassifierGUI:
         else:
             tk.Label(
                 title_card,
-                text="鈾�  No saved notes yet",
-                font=("Arial", 11),
+                text="♡  No saved notes yet",
+                font=(self.FONT, 11),
                 bg=self.WHITE,
                 fg=self.LIGHT_TEXT
             ).pack(anchor="w", padx=18, pady=(0, 15))
 
-        # New note button stays outside the list.
         toolbar = tk.Frame(self.content, bg=self.CREAM)
         toolbar.pack(fill="x", padx=30, pady=(0, 15))
 
         tk.Button(
-            toolbar, text="锛�  NEW NOTE", command=self.create_personal_note,
-            font=("Arial", 10, "bold"), bg=self.LAVENDER, fg=self.DARK_PURPLE,
+            toolbar, text="＋  NEW NOTE", command=self.create_personal_note,
+            font=(self.FONT, 10, "bold"), bg=self.LAVENDER, fg=self.DARK_PURPLE,
             activebackground=self.BABY_PINK, relief="flat", bd=0,
             padx=20, pady=9, cursor="hand2"
         ).pack(side="left")
 
         tk.Label(
-            toolbar, text="  Write anything you want 鈾�", font=("Arial", 9),
+            toolbar, text="  Write anything you want ♡", font=(self.FONT, 9),
             bg=self.CREAM, fg=self.LIGHT_TEXT
         ).pack(side="left", padx=8)
 
     def create_personal_note(self):
 
         note_window = tk.Toplevel(self.root)
-        note_window.title("New Note 鈾�")
+        note_window.title("New Note ♡")
         note_window.geometry("550x560")
         note_window.minsize(500, 500)
         note_window.configure(bg=self.CREAM)
 
-        # Use grid so the SAVE NOTE button always stays visible at the bottom.
         note_window.grid_rowconfigure(2, weight=1)
         note_window.grid_columnconfigure(0, weight=1)
 
         tk.Label(
-            note_window, text="馃尭 New Personal Note", font=("Arial", 18, "bold"),
+            note_window, text="🌸 New Personal Note", font=(self.FONT, 18, "bold"),
             bg=self.CREAM, fg=self.DARK_PURPLE
         ).grid(row=0, column=0, pady=(22, 5))
 
         tk.Label(
-            note_window, text="Write whatever is on your mind 鈾�", font=("Arial", 9),
+            note_window, text="Write whatever is on your mind ♡", font=(self.FONT, 9),
             bg=self.CREAM, fg=self.LIGHT_TEXT
         ).grid(row=1, column=0, pady=(0, 12))
 
@@ -962,14 +1090,14 @@ class EmailClassifierGUI:
         editor_frame.grid_columnconfigure(0, weight=1)
 
         title_entry = tk.Entry(
-            editor_frame, font=("Arial", 11), bg=self.WHITE, fg=self.TEXT,
+            editor_frame, font=(self.FONT, 11), bg=self.WHITE, fg=self.TEXT,
             relief="solid", bd=1
         )
         title_entry.grid(row=0, column=0, sticky="ew", ipady=8, pady=(0, 8))
         title_entry.insert(0, "Note title...")
 
         note_text = scrolledtext.ScrolledText(
-            editor_frame, font=("Arial", 10), bg=self.WHITE, fg=self.TEXT,
+            editor_frame, font=(self.FONT, 10), bg=self.WHITE, fg=self.TEXT,
             wrap=tk.WORD, relief="solid", bd=1
         )
         note_text.grid(row=1, column=0, sticky="nsew")
@@ -980,7 +1108,7 @@ class EmailClassifierGUI:
 
             if not content:
                 messagebox.showwarning(
-                    "Empty Note", "Please write something first 鈾�", parent=note_window
+                    "Empty Note", "Please write something first ♡", parent=note_window
                 )
                 return
 
@@ -1000,8 +1128,8 @@ class EmailClassifierGUI:
         button_frame.grid(row=3, column=0, sticky="ew", padx=35, pady=(12, 18))
 
         tk.Button(
-            button_frame, text="鈾�  SAVE NOTE", command=save_note,
-            font=("Arial", 11, "bold"), bg=self.BABY_PINK, fg=self.DARK_PURPLE,
+            button_frame, text="♡  SAVE NOTE", command=save_note,
+            font=(self.FONT, 11, "bold"), bg=self.BABY_PINK, fg=self.DARK_PURPLE,
             activebackground=self.LAVENDER, activeforeground=self.DARK_PURPLE,
             relief="flat", bd=0, padx=35, pady=11, cursor="hand2"
         ).pack(anchor="center")
@@ -1009,7 +1137,7 @@ class EmailClassifierGUI:
     def edit_email_note(self, email):
 
         note_window = tk.Toplevel(self.root)
-        note_window.title("Email Note 鈾�")
+        note_window.title("Email Note ♡")
         note_window.geometry("550x560")
         note_window.minsize(500, 500)
         note_window.configure(bg=self.CREAM)
@@ -1018,19 +1146,19 @@ class EmailClassifierGUI:
         note_window.grid_columnconfigure(0, weight=1)
 
         tk.Label(
-            note_window, text="馃拰  " + email.get("name", "Email Note"),
-            font=("Arial", 16, "bold"),
+            note_window, text="💌  " + email.get("name", "Email Note"),
+            font=(self.FONT, 16, "bold"),
             bg=self.CREAM, fg=self.DARK_PURPLE,
             wraplength=480, justify="left"
         ).grid(row=0, column=0, sticky="w", padx=35, pady=(22, 8))
 
         tk.Label(
-            note_window, text="Write your personal note below 鈾�",
-            font=("Arial", 9), bg=self.CREAM, fg=self.LIGHT_TEXT
+            note_window, text="Write your personal note below ♡",
+            font=(self.FONT, 9), bg=self.CREAM, fg=self.LIGHT_TEXT
         ).grid(row=1, column=0, sticky="w", padx=35, pady=(0, 12))
 
         note_text = scrolledtext.ScrolledText(
-            note_window, font=("Arial", 10), bg=self.WHITE, fg=self.TEXT,
+            note_window, font=(self.FONT, 10), bg=self.WHITE, fg=self.TEXT,
             wrap=tk.WORD, relief="solid", bd=1
         )
         note_text.grid(row=2, column=0, sticky="nsew", padx=35)
@@ -1043,7 +1171,7 @@ class EmailClassifierGUI:
 
             if not note:
                 messagebox.showwarning(
-                    "Empty Note 鈾�",
+                    "Empty Note ♡",
                     "Please write something before saving.",
                     parent=note_window
                 )
@@ -1057,8 +1185,8 @@ class EmailClassifierGUI:
         button_frame.grid(row=3, column=0, sticky="ew", padx=35, pady=(12, 18))
 
         tk.Button(
-            button_frame, text="鈾�  SAVE NOTE", command=save_email_note,
-            font=("Arial", 11, "bold"), bg=self.BABY_PINK, fg=self.DARK_PURPLE,
+            button_frame, text="♡  SAVE NOTE", command=save_email_note,
+            font=(self.FONT, 11, "bold"), bg=self.BABY_PINK, fg=self.DARK_PURPLE,
             activebackground=self.LAVENDER, activeforeground=self.DARK_PURPLE,
             relief="flat", bd=0, padx=35, pady=11, cursor="hand2"
         ).pack(anchor="center")
@@ -1075,13 +1203,12 @@ class EmailClassifierGUI:
         if email not in self.notes:
             self.notes.append(email)
 
-        # Open the note editor immediately so the user can write and save the note.
         self.edit_email_note(email)
 
     def show_history(self):
 
         self.clear_content()
-        self.create_header("Saved History", "Your previously classified emails 鈾�")
+        self.create_header("Saved History", "Your previously classified emails ♡")
 
         card = tk.Frame(
             self.content, bg=self.WHITE,
@@ -1094,8 +1221,8 @@ class EmailClassifierGUI:
         if not saved:
             tk.Label(
                 card,
-                text="鈾n\nNo saved emails yet.\n\nClassify an email and save it here.",
-                font=("Arial", 14), bg=self.WHITE, fg=self.LIGHT_TEXT, justify="center"
+                text="♡\n\nNo saved emails yet.\n\nClassify an email and save it here.",
+                font=(self.FONT, 14), bg=self.WHITE, fg=self.LIGHT_TEXT, justify="center"
             ).pack(expand=True)
             return
 
@@ -1111,25 +1238,24 @@ class EmailClassifierGUI:
         item.pack(fill="x", padx=20, pady=8)
 
         tk.Label(
-            item, text="馃拰 " + email["name"], font=("Arial", 10, "bold"),
+            item, text="💌 " + email["name"], font=(self.FONT, 10, "bold"),
             bg=self.LIGHT_ROSE, fg=self.DARK_PURPLE
         ).pack(side="left", padx=15, pady=12)
 
         classification = email.get("classification", "Normal")
 
         tk.Label(
-            item, text=classification.upper(), font=("Arial", 8, "bold"),
+            item, text=classification.upper(), font=(self.FONT, 8, "bold"),
             bg=self.LIGHT_ROSE,
             fg="#C44F76" if classification == "Important" else "#65804A"
         ).pack(side="left", padx=10)
 
         tk.Button(
-            item, text="鈾� Add to Notes",
+            item, text="♡ Add to Notes",
             command=lambda e=email: self.add_email_to_notes(e),
-            font=("Arial", 8), bg=self.WHITE, fg=self.DARK_PURPLE,
+            font=(self.FONT, 8), bg=self.WHITE, fg=self.DARK_PURPLE,
             relief="flat", bd=0, cursor="hand2"
         ).pack(side="right", padx=15)
-
 
 
 if __name__ == "__main__":
@@ -1137,4 +1263,3 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = EmailClassifierGUI(root)
     root.mainloop()
-
